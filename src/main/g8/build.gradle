@@ -142,8 +142,6 @@ jar {
     }
 }
 
-// Check Scala coding conventions
-apply from: 'gradle/scalastyle.gradle'
 
 // Define a new task to run Scala tests
 task scalatest(dependsOn: compileTestScala) << {
