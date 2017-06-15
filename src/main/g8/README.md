@@ -79,6 +79,6 @@ Submit application to Spark cluster (in this case, local cluster is used):
 
 ```
 export MASTER='local-cluster[3,2,1024]'
-$SPARK_HOME/bin/spark-submit --class com.yarenty.h2o.Main build/libs/h2o_app.jar
+SPARK_HOME/bin/spark-submit --class com.yarenty.h2o.Main build/libs/h2o_app.jar
 ```
 
