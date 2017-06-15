@@ -70,14 +70,3 @@ libraryDependencies ++= {
 
 //libraryDependencies += "com.typesafe.scala-logging" % "scala-logging_2.11" % "3.1.0"
 
-
-addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-
-TaskKey[Set[File]]("copy-for-deploy") <<=
-  (fullClasspath in Runtime, target) map
-    { (cp, out) =>
-      val entries: Seq[File] = cp.files
-      val toDirectory: File = out / "lib"
-      IO.copy( entries x flat(toDirectory) )
-    }
-
