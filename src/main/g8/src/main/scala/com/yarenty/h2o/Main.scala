@@ -100,7 +100,7 @@ object Main extends SparklingWaterApp with SparkContextSupport {
     println("Hello World!")
     Log.info("Hello World - using H2O logger")
 
-    h2oContext.openFlow()
+//    h2oContext.openFlow()
 
     val model = flow()
     
