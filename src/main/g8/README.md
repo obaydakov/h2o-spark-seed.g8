@@ -12,7 +12,7 @@ Sparkling Water 2.1.8 which integrates:
 
 
 ## Project structure
- 
+
 ```
 ├─ gradle/        - Gradle definition files
 ├─ src/           - Source code
@@ -67,7 +67,7 @@ Create application assembly which can be directly submitted to Spark cluster:
 ./gradlew shadowJar
 ```
 
-The command creates jar file `build/libs/h2o_app.jar` containing all necessary classes to run application on top of Spark cluster.
+The command creates jar file `build/libs/$name$.jar` containing all necessary classes to run application on top of Spark cluster.
 
 ## SBT
 ```
@@ -79,6 +79,6 @@ Submit application to Spark cluster (in this case, local cluster is used):
 
 ```
 export MASTER='local-cluster[3,2,1024]'
-SPARK_HOME/bin/spark-submit --class com.yarenty.h2o.Main build/libs/h2o_app.jar
+SPARK_HOME/bin/spark-submit --class com.yarenty.h2o.Main build/libs/$name$.jar
 ```
 

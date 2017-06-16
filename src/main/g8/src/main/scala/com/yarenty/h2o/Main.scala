@@ -1,158 +1,111 @@
 package com.yarenty.h2o
 
+import hex.kmeans.{KMeans, KMeansModel}
+import hex.kmeans.KMeansModel.KMeansParameters
 import org.apache.spark.SparkContext
 import org.apache.spark.h2o.H2OContext
 import org.apache.spark.sql.{SQLContext, SparkSession}
-import water.fvec.{Frame, H2OFrame, Vec}
+import water.AutoBuffer
+import water.fvec.H2OFrame
 import water.support.{H2OFrameSupport, SparkContextSupport, SparklingWaterApp}
+import water.util.Log
 
 /**
   * Created by yarenty on 15/06/2017.
   */
-object Main extends SparkContextSupport {
+object Main extends SparklingWaterApp with SparkContextSupport {
 
   // Prepare environment
-  implicit val sc = new SparkContext(configure("H2O Hyper-parameter AI search"))
+  implicit val sc = new SparkContext(configure("H2O Sparkling Water App"))
   // SQL support
   implicit val sqlContext = SparkSession.builder().getOrCreate().sqlContext
   // Start H2O services
   implicit val h2oContext = H2OContext.getOrCreate(sc)
 
-  
+
+  def flow(): KMeansModel = {
+
+    // Add a file to be available for cluster mode
+    addFiles(sc, absPath("src/main/resources/prostate.csv"))
+
+    // Run H2O cluster inside Spark cluster
+    import h2oContext.implicits._
+
+    // We do not need to wait for H2O cloud since it will be launched by backend
+
+    // Load raw data
+    val parse = ProstateParse
+    val rawdata = sc.textFile(enforceLocalSparkFile("prostate.csv"), 2)
+    // Parse data into plain RDD[Prostate]
+    val table = rawdata.map(_.split(",")).map(line => parse(line))
+
+    // Convert to SQL type RDD
+    //    val sqlContext = SparkSession.builder().getOrCreate().sqlContext
+    import sqlContext.implicits._ // import implicit conversions
+    table.toDF.createOrReplaceTempView("prostate_table")
+
+    // Invoke query on data; select a subsample
+    val query = "SELECT * FROM prostate_table WHERE CAPSULE=1"
+    val result = sqlContext.sql(query) // Using a registered context and tables
+
+    // Build a KMeans model, setting model parameters via a Properties
+    val model = runKmeans(result)
+    println(model)
+    model
+  }
+
+  private def runKmeans[T](trainDataFrame: H2OFrame): KMeansModel = {
+    val params = new KMeansParameters
+    params._train = trainDataFrame._key
+    params._k = 3
+    // Create a builder
+    val job = new KMeans(params)
+    // Launch a job and wait for the end.
+    val kmm = job.trainModel.get
+    // Print the JSON model
+    println(new String(kmm._output.writeJSON(new AutoBuffer()).buf()))
+    // Return a model
+    
+    kmm
+  }
+
+
+  /** Prostate schema definition. */
+  case class Prostate(ID: Option[Long],
+                      CAPSULE: Option[Int],
+                      AGE: Option[Int],
+                      RACE: Option[Int],
+                      DPROS: Option[Int],
+                      DCAPS: Option[Int],
+                      PSA: Option[Float],
+                      VOL: Option[Float],
+                      GLEASON: Option[Int]) {
+    def isWrongRow(): Boolean = (0 until productArity).map(idx => productElement(idx)).forall(e => e == None)
+  }
+
+  /** A dummy csv parser for prostate dataset. */
+  object ProstateParse extends Serializable {
+    val EMPTY = Prostate(None, None, None, None, None, None, None, None, None)
+
+    def apply(row: Array[String]): Prostate = {
+      import water.support.ParseSupport._
+      if (row.length < 9) EMPTY
+      else Prostate(long(row(0)), int(row(1)), int(row(2)), int(row(3)), int(row(4)), int(row(5)), float(row(6)), float(row(7)), int(row(8)))
+    }
+  }
+
 
   def main(args: Array[String]): Unit = {
 
+    println("Hello World!")
+    Log.info("Hello World - using H2O logger")
 
+    h2oContext.openFlow()
 
-/*
-    val datadir = "/opt/data/mercedes"
-
-    val input = new H2OFrame(getParser, new java.net.URI(s"${datadir}/train.csv"))
-    val names = input._names.drop(2) //ID,y
-    println(names.mkString(";"))
-    input.colToEnum(names)
-    val (train, valid) = app.split(input, Array("train_input.hex","valid_input.hex"))
-    val test = new H2OFrame(getParser, new java.net.URI(s"${datadir}/test.csv"))
-    test.colToEnum(names)
+    val model = flow()
     
-    val out = GBMModelUnderTest.calculate(params, train,valid)
-    
-    /   val hp = app.initialRound( train,valid)
-     val hp = app.prevPredict()
-
-    val vecs:Array[Vec] = for (h <- hp) yield {
-      val v = Vec.makeZero(h.length)
-      for (i <- h.indices) {
-        v.set(i,h(i))
-      }
-      v
-    }
-    
-
-    
-    val outFrame = new H2OFrame(new Frame(Array("alpha", "lambda", "beta", "acc"), vecs))
-    val (train, test) = app.split(outFrame)
-
-
-
-
-    val pVecs:Array[Vec] = for (h <-  app.toPredict()) yield {
-      val v = Vec.makeZero(h.length)
-      for (i <- h.indices) {
-        v.set(i,h(i))
-      }
-      v
-    }
-    val predMe = new H2OFrame(new Frame(Array("alpha", "lambda", "beta", "acc"), pVecs))
-    
-    
-    val out = HyperAIFinder.calculate(train, test, predMe)
-
-    println(out.maxs().mkString(";"))
-    
-    val ids = app.getIds(out)
-
-    val params = GBMHyperParams.getParams()
-    
-    println(" predicted best  output:")
-    
-    var pred = Vector[Double]()
-    var real = Vector[Double]()
-
-    for (i <-ids) {
-      
-      
-      val a = pVecs(0).at(i)
-      val l = pVecs(1).at(i)
-      val b = pVecs(2).at(i)
-      val p = out.at(i)
-      
-      println(s"$i => a=$a; l=$l; b=$b; predOut=$p;")
-
-
-      params._alpha = Array(a)
-      params._lambda = Array(l)
-      params._beta_epsilon = b
-
-      val fout = GLMModelUnderTest.calculate(params)
-      println(s"$i => a=$a; l=$l; b=$b; predOut=$p; REAL!! = $fout ")
-      pred = pred :+ p
-      real = real :+ fout
-    }
-
-    val initial = outFrame.vec("acc").maxs()
-    
-    println("SUMMARY:")
-    val _p = new GLMParameters()
-    _p._family = GLMParameters.Family.binomial
-    _p._alpha = Array(1.0) 
-    _p._lambda = Array(0.0)
-    
-    val blind = GLMModelUnderTest.calculate(_p)
-    println("SUMMARY:")
-    
-    println("            blind guess=" + blind)
-    println("     initial max values=" + initial.mkString(";"))
-    println(" predicted by inception=" + pred.mkString(";"))
-    println("      real after retest=" + real.mkString(";"))
-
-*/
-
+    // Shutdown Spark cluster and H2O
+//    shutdown()
   }
-
-
-//  def split(in: H2OFrame): (H2OFrame, H2OFrame) = {
-//    val keys = Array[String]("trainHyper.hex", "testHyper.hex")
-//    split(in,keys)
-//  }
-//
-//
-//  def split(in: H2OFrame, keys:Array[String]): (H2OFrame, H2OFrame) = {
-//    import h2oContext.implicits._
-//
-//
-//    val ratios = Array[Double](0.8, 0.2)
-//    val frs = splitFrame(in, keys, ratios)
-//    val (train, test) = (frs(0), frs(1))
-//    (train, test)
-//  }
-//
-
-
-  def getIds(vec: Vec): Array[Int] = {
-    val min = vec.maxs().min
-    vecToArray(vec).zipWithIndex.filter(_._1 >= min).map(_._2)
-  }
-
-
-  def vecToArray(v: Vec): Array[Double] = {
-    val arr = Array.ofDim[Double](v.length.toInt)
-    for (i <- 0 until v.length.toInt) {
-      arr(i) = v.at(i)
-    }
-    arr
-  }
-
-  
 
 }

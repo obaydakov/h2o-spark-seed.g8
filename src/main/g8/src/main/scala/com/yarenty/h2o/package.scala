@@ -1,13 +1,14 @@
-package com.yarenty.h2o
+package com.yarenty
 
 import water.parser.{DefaultParserProviders, ParseSetup}
 
 /**
-  * Created by yarenty on 15/06/2017.
+  * Created by yarenty on 16/06/2017.
   */
 package object h2o {
-  
-  def getParser: ParseSetup = {
+
+
+  def getSimpleCSVParser: ParseSetup = {
     val p = new ParseSetup()
     p.setParseType(DefaultParserProviders.CSV_INFO)
     p.setSeparator(44)
@@ -15,5 +16,6 @@ package object h2o {
     p.setCheckHeader(1)
     p
   }
-
+  
+  
 }

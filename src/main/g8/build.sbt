@@ -25,7 +25,7 @@ version := packageVersion
 
 assemblySettings
 
-name := "app"
+name := "$name$"
 
 organization := "com.yarenty.h2o"
 
@@ -52,21 +52,17 @@ resolvers in ThisBuild += Resolver.mavenLocal
 
 libraryDependencies ++= {
   Seq(
-    "ch.qos.logback" % "logback-classic" % "1.1.2",
+//    "ch.qos.logback" % "logback-classic" % "1.1.2",
+//
+//    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
+//    "org.scalaz.stream" % "scalaz-stream_2.11" % "0.7a",
 
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-    "org.scalaz.stream" % "scalaz-stream_2.11" % "0.7a",
-
-     "com.github.wookietreiber" % "scala-chart_2.11" % "0.5.1",
-    "com.itextpdf" % "itextpdf" % "5.5.10",
-    "org.scala-lang.modules" % "scala-swing_2.11" % "2.0.0",
-
-
-  "ai.h2o" % "sparkling-water-core_2.11" % "2.1.8",
+    "ai.h2o" % "sparkling-water-core_2.11" % "2.1.8",
     "ai.h2o" % "sparkling-water-ml_2.11" % "2.1.8"
-  ) 
+  )
 }
 
 
 //libraryDependencies += "com.typesafe.scala-logging" % "scala-logging_2.11" % "3.1.0"
+
 
