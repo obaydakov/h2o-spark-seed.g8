@@ -1,22 +1,42 @@
 package com.yarenty.h2o
 
+import java.io.{ByteArrayInputStream, File, InputStream, PrintWriter}
+import java.nio.charset.StandardCharsets
+
+import org.apache.commons.io.FilenameUtils
 import org.apache.spark.h2o.H2OContext
-import water.fvec.{H2OFrame, Vec}
+import water.fvec.{Frame, H2OFrame, Vec}
 import water.support.H2OFrameSupport
+import water.util.Log
+
+import scala.reflect.io.Directory
 
 /**
   * Created by yarenty on 16/06/2017.
   */
 object Helper {
 
-  def split(in: H2OFrame)(implicit h2oContext: H2OContext): (H2OFrame, H2OFrame) = {
-    import h2oContext.implicits._
+  def saveCSV(f: Frame, fileName: String): Unit = {
+    Log.debug("CSV export::" + fileName)
+    val csv = f.toCSV(true, false)
+    val csv_writer = new PrintWriter(new File(fileName))
+    while (csv.available() > 0) {
+      csv_writer.write(csv.read.toChar)
+    }
+    csv_writer.close()
+  }
 
-    val keys = Array[String]("train.hex", "test.hex")
-    val ratios = Array[Double](0.8, 0.2)
 
-    val frs = H2OFrameSupport.splitFrame(in, keys, ratios)
-    (frs(0), frs(1))
+  def createOutputDirectory(fileName: String, force: Boolean = false): Boolean = {
+    val dir = FilenameUtils.getFullPathNoEndSeparator(fileName)
+    Log.debug(s"Create output directory: $dir")
+    val out = Directory(dir)
+    out.createDirectory(force = force)
+    if (force && !out.exists) {
+      Log.err(s"Could not create output directory: $dir")
+      System.exit(-1)
+    }
+    out.exists
   }
 
 
@@ -40,7 +60,7 @@ object Helper {
     vec
   }
 
-  
+
   def arrayToTimeVec(arr: Array[Long]): Vec = {
     val vec = Vec.makeZero(arr.length, Vec.T_TIME)
     val vw = vec.open
