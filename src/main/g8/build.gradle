@@ -29,8 +29,8 @@ buildscript {
 
 // Configure project properties
 ext {
-    sparkVersion = "2.0"
-    spWaterVersion = "2.1.8"
+    sparkVersion = "2.2.0"
+    spWaterVersion = "2.2.0"
     scalaBinaryVersion = "2.11"
     scalaVersion = "2.11.8"
 }

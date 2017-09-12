@@ -2,9 +2,9 @@
 
 
 ## Dependencies
-Sparkling Water 2.1.8 which integrates:
- - Spark 2.1.0
- - H2O 3.10.4.8 
+Sparkling Water 2.2.0 which integrates:
+ - Spark 2.2.0
+ - H2O 3.14.0.2 
 
 ## Status
 
