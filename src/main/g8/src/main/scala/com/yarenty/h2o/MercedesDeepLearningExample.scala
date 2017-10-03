@@ -42,7 +42,7 @@ object MercedesDeepLearningExample extends Example {
 
     val prediction = model.score(test)
 
-    Helper.saveCSV(prediction, datadir + "/out.csv")
+    saveCSV(prediction, datadir + "/out.csv")
   }
 
 
