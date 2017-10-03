@@ -1,6 +1,7 @@
 package com.yarenty
 
-import java.io.{File, PrintWriter}
+import java.io.{ByteArrayInputStream, File, InputStream, PrintWriter}
+import java.nio.charset.StandardCharsets
 
 import org.apache.commons.io.FilenameUtils
 
@@ -31,6 +32,17 @@ package object h2o {
     csv_writer.close()
   }
 
+
+
+  def saveString(f: String, fileName: String, force: Boolean = true): Unit = {
+    createOutputDirectory(fileName, force)
+    val stream: InputStream = new ByteArrayInputStream(f.getBytes(StandardCharsets.UTF_8))
+    val string_writer = new PrintWriter(new File(fileName))
+    while (stream.available() > 0) {
+      string_writer.write(stream.read.toChar)
+    }
+    string_writer.close()
+  }
 
   def createOutputDirectory(fileName: String, force: Boolean = false): Boolean = {
     val dir = FilenameUtils.getFullPathNoEndSeparator(fileName)
