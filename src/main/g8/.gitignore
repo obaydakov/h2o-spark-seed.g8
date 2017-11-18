@@ -72,4 +72,6 @@ h2ologs/*
 build/
 
 /.idea/
+/src/scoverage
+/src/testScoverage
 

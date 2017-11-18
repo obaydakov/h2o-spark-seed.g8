@@ -3,7 +3,12 @@ package com.yarenty
 import java.io.{ByteArrayInputStream, File, InputStream, PrintWriter}
 import java.nio.charset.StandardCharsets
 
+import hex.FrameSplitter
 import org.apache.commons.io.FilenameUtils
+import water.Key
+import water.fvec.{Frame, H2OFrame, Vec}
+import water.parser.{DefaultParserProviders, ParseSetup}
+import water.util.Log
 
 import scala.reflect.io.Directory
 
@@ -31,7 +36,6 @@ package object h2o {
     }
     csv_writer.close()
   }
-
 
 
   def saveString(f: String, fileName: String, force: Boolean = true): Unit = {
@@ -107,8 +111,6 @@ package object h2o {
     // return results
     splitter.getResult
   }
-
-
 
 
 }

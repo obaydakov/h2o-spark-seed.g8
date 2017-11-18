@@ -1,8 +1,8 @@
 package com.yarenty.h2o
 
 import com.yarenty.h2o.Main.{absPath, addFiles, enforceLocalSparkFile, h2oContext, sc, sqlContext}
-import hex.kmeans.{KMeans, KMeansModel}
 import hex.kmeans.KMeansModel.KMeansParameters
+import hex.kmeans.{KMeans, KMeansModel}
 import water.AutoBuffer
 import water.fvec.H2OFrame
 

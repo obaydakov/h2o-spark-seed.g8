@@ -3,8 +3,8 @@ package com.yarenty.h2o
 import java.net.URI
 
 import com.yarenty.h2o.Main.h2oContext
-import hex.deeplearning.{DeepLearning, DeepLearningModel}
 import hex.deeplearning.DeepLearningModel.DeepLearningParameters
+import hex.deeplearning.{DeepLearning, DeepLearningModel}
 import org.apache.spark.h2o.H2OContext
 import water.fvec.H2OFrame
 import water.support.H2OFrameSupport
@@ -21,7 +21,6 @@ object MercedesDeepLearningExample extends Example {
     val trainFile = datadir + "/train.csv"
     val testFile = datadir + "/test.csv"
     // Run H2O cluster inside Spark cluster
-    import h2oContext.implicits._
 
     // We do not need to wait for H2O cloud since it will be launched by backend
     val input = new H2OFrame(getSimpleCSVParser, new URI(trainFile))

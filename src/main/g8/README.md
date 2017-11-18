@@ -3,32 +3,26 @@
 
 ## Dependencies
 Sparkling Water 2.2.0 which integrates:
- - Spark 2.2.0
- - H2O 3.14.0.2 
-
-## Status
-
-- Step 1: Data preparation
+ - Spark 2.2.0 (H2O 3.17.0.4)
 
 
 ## Project structure
 
 ```
-├─ gradle/        - Gradle definition files
-├─ src/           - Source code
-│  ├─ main/       - Main implementation code 
+├─ src/                     - Source code
+│  ├─ main/                 - Main implementation code 
 │  │  ├─ scala/
-│  ├─ test/       - Test code
+│  ├─ test/                 - Test code
 │  │  ├─ scala/
-├─ build.gradle   - Build file for this project
-├─ gradlew        - Gradle wrapper 
+├─ build.gradle             - Build file for this project
+├─ scalastyle-config.xml    - scala style
 ```
 
 
 
 ## Project building
 
-For building, please, use provided `gradlew` command:
+For building, please, use provided `gradle` command:
 
 ```
 ./gradlew build
@@ -68,11 +62,6 @@ Create application assembly which can be directly submitted to Spark cluster:
 ```
 
 The command creates jar file `build/libs/$name$.jar` containing all necessary classes to run application on top of Spark cluster.
-
-## SBT
-```
-sbt assembly
-```
 
 
 Submit application to Spark cluster (in this case, local cluster is used):
